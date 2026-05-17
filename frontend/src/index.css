@@ -1238,3 +1238,17 @@ a:hover {
         padding: 20px;
     }
 }
+/* Member 3 timed-quiz compatible pages */
+details {
+  margin-top: 12px;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+details ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}

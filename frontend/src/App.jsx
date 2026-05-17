@@ -31,6 +31,7 @@ export default function App() {
 
                     <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
                     <Route path="/admin/questions" element={<AdminRoute><AdminQuestionsPage /></AdminRoute>} />
+            <Route path="/admin/quizzes" element={<AdminRoute><AdminQuizzesPage /></AdminRoute>} />
                 </Routes>
             </Layout>
         </BrowserRouter>

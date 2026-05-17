@@ -1,23 +1,9 @@
-import express from 'express';
-import { 
-    getGlobalLeaderboard, 
-    getCategoryLeaderboard, 
-    getUserRank,
-    getCategories
-} from '../controllers/leaderboard.controller.js';
+import { Router } from 'express';
+import { getLeaderboard } from '../controllers/leaderboard.controller.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
-const router = express.Router();
+const router = Router();
 
-// Get global leaderboard
-router.get('/', getGlobalLeaderboard);
-
-// Get categories
-router.get('/categories', getCategories);
-
-// Get user's rank
-router.get('/rank/:userId', getUserRank);
-
-// Get leaderboard by category
-router.get('/category/:category', getCategoryLeaderboard);
+router.get('/', asyncHandler(getLeaderboard));
 
 export default router;

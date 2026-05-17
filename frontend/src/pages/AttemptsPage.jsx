@@ -1,52 +1,51 @@
-import { useState, useEffect } from 'react';
-import { getUserAttempts } from '../api/scoreApi';
+import { useEffect, useState } from 'react';
+import { scoreApi } from '../api/scoreApi';
 import AttemptCard from '../components/attempts/AttemptCard';
 
 export default function AttemptsPage() {
-    const [attempts, setAttempts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [attempts, setAttempts] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        loadAttempts();
-    }, []);
+  useEffect(() => {
+    const loadAttempts = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-    async function loadAttempts() {
-        try {
-            setLoading(true);
-            const response = await getUserAttempts();
-            if (response.success) {
-                setAttempts(response.data.attempts);
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to load attempts');
-        } finally {
-            setLoading(false);
-        }
-    }
+        const response = await scoreApi.getMyAttempts();
+        setAttempts(response.data.data.attempts || []);
+      } catch (err) {
+        setError(err.response?.data?.error || 'Failed to load attempts');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return (
-        <div className="attempts-page">
-            <div className="page-header">
-                <h1>My Attempts</h1>
-            </div>
+    loadAttempts();
+  }, []);
 
-            {loading ? (
-                <div className="loading">Loading attempts...</div>
-            ) : error ? (
-                <div className="error-message">{error}</div>
-            ) : attempts.length === 0 ? (
-                <div className="empty-state">
-                    <p>You haven't completed any quizzes yet.</p>
-                    <a href="/quiz" className="btn btn-primary">Take Your First Quiz</a>
-                </div>
-            ) : (
-                <div className="attempts-grid">
-                    {attempts.map(attempt => (
-                        <AttemptCard key={attempt._id} attempt={attempt} />
-                    ))}
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <section className="card">
+      <h2>My Attempts</h2>
+
+      <p>
+        This page shows your previous timed quiz attempts, including correct
+        answers, time bonus, and final score.
+      </p>
+
+      {loading && <p>Loading attempts...</p>}
+      {error && <p className="error">{error}</p>}
+
+      <div className="quiz-card-grid">
+        {attempts.map((attempt) => (
+          <AttemptCard key={attempt._id} attempt={attempt} />
+        ))}
+
+        {!attempts.length && !loading && (
+          <div className="empty-state">No attempts found yet.</div>
+        )}
+      </div>
+    </section>
+  );
 }
