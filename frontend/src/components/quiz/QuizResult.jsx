@@ -1,29 +1,22 @@
-export default function QuizResult({ score, total, percentage }) {
-    function getGrade(percentage) {
-        if (percentage >= 90) return { grade: 'A', message: 'Excellent!' };
-        if (percentage >= 80) return { grade: 'B', message: 'Great job!' };
-        if (percentage >= 70) return { grade: 'C', message: 'Good work!' };
-        if (percentage >= 60) return { grade: 'D', message: 'You passed!' };
-        return { grade: 'F', message: 'Keep practicing!' };
-    }
+export default function QuizResult({ result }) {
+  const timeBonus = result.timeBonus ?? 0;
+  const correctAnswers = result.correctAnswers ?? 0;
+  const totalQuestions = result.totalQuestions ?? 0;
+  const finalScore = result.score ?? correctAnswers;
 
-    const { grade, message } = getGrade(percentage);
+  return (
+    <div className="card quiz-result-card">
+      <h2>Quiz Completed</h2>
 
-    return (
-        <div className="quiz-result">
-            <div className={`result-grade grade-${grade.toLowerCase()}`}>
-                <span className="grade-letter">{grade}</span>
-            </div>
-            
-            <h1>{message}</h1>
-            
-            <div className="result-score">
-                <span className="score-value">{score}</span>
-                <span className="score-divider">/</span>
-                <span className="score-total">{total}</span>
-            </div>
-            
-            <p className="result-percentage">{percentage}% correct</p>
-        </div>
-    );
+      <div className="result-summary">
+        <div className="result-row"><span>Quiz</span><strong>{result.quizName || 'Timed Quiz'}</strong></div>
+        <div className="result-row"><span>Correct answers</span><strong>{correctAnswers} / {totalQuestions}</strong></div>
+        <div className="result-row"><span>Time bonus</span><strong>+{timeBonus}</strong></div>
+        <div className="result-row result-final-score"><span>Final score</span><strong>{finalScore}</strong></div>
+      </div>
+
+      <p className="result-explanation">The final score is correct answers plus a small time bonus capped at +1 point.</p>
+      {result.createdAt && <p>Completed at: {new Date(result.createdAt).toLocaleString()}</p>}
+    </div>
+  );
 }

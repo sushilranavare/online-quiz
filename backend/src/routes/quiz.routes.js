@@ -1,10 +1,16 @@
 import express from 'express';
-import { getCategories, getQuestionsByCategory } from '../controllers/quiz.controller.js';
-import { authMiddleware } from '../middleware/auth.middleware.js';
+import {
+  getAvailableQuizzes,
+  getQuizzes,
+  getQuizQuestions,
+  getQuizQuestionsByQuiz
+} from '../controllers/quiz.controller.js';
 
 const router = express.Router();
 
-router.get('/categories', getCategories);
-router.get('/:category', authMiddleware, getQuestionsByCategory);
+router.get('/available', getAvailableQuizzes);
+router.get('/quizzes', getQuizzes);
+router.get('/', getQuizQuestions);
+router.get('/:quizId', getQuizQuestionsByQuiz);
 
 export default router;

@@ -1,60 +1,47 @@
 import mongoose from 'mongoose';
 
-const questionSchema = new mongoose.Schema({
-    category: {
-        type: String,
-        required: [true, 'Category is required'],
-        trim: true,
-        enum: ['Geography', 'Science', 'History', 'Sports', 'Entertainment', 'Technology']
+const questionSchema = new mongoose.Schema(
+  {
+    quizId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Quiz',
+      required: [true, 'Quiz is required']
     },
     questionText: {
-        type: String,
-        required: [true, 'Question text is required'],
-        trim: true
+      type: String,
+      required: [true, 'Question text is required'],
+      trim: true
     },
     options: {
-        type: [String],
-        required: [true, 'Options are required'],
-        validate: {
-            validator: function(v) {
-                return v.length === 4;
-            },
-            message: 'Must have exactly 4 options'
-        }
+      type: [String],
+      required: true,
+      validate: {
+        validator(value) {
+          return Array.isArray(value) && value.length === 4 && value.every(Boolean);
+        },
+        message: 'Each question must have exactly 4 non-empty options'
+      }
     },
-    correctOption: {
-        type: Number,
-        required: [true, 'Correct option index is required'],
-        min: 0,
-        max: 3
-    },
-    difficulty: {
-        type: String,
-        enum: ['easy', 'medium', 'hard'],
-        default: 'medium'
+    correctAnswer: {
+      type: String,
+      required: [true, 'Correct answer is required']
     },
     isActive: {
-        type: Boolean,
-        default: true
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
+      type: Boolean,
+      default: false
     }
+  },
+  { timestamps: true }
+);
+
+questionSchema.pre('validate', function validateCorrectAnswer(next) {
+  if (this.options && !this.options.includes(this.correctAnswer)) {
+    return next(new Error('Correct answer must match one of the options'));
+  }
+
+  return next();
 });
 
-questionSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
-    next();
-});
-
-questionSchema.pre('findOneAndUpdate', function(next) {
-    this.set({ updatedAt: Date.now() });
-    next();
-});
-
-export default mongoose.model('Question', questionSchema);
+const Question = mongoose.model('Question', questionSchema);
+export { Question };
+export default Question;

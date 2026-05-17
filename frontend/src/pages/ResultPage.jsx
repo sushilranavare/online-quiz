@@ -1,61 +1,32 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useQuiz } from '../context/QuizContext';
-import { submitScore } from '../api/scoreApi';
+import { Link } from 'react-router-dom';
+import { useQuiz } from '../hooks/useQuiz';
 import QuizResult from '../components/quiz/QuizResult';
 
 export default function ResultPage() {
-    const { state, dispatch } = useQuiz();
-    const navigate = useNavigate();
+  const { quizState, quizDispatch } = useQuiz();
 
-    async function handleSubmitScore() {
-        try {
-            await submitScore({
-                score: state.score,
-                totalQuestions: state.questions.length,
-                category: state.category,
-                answers: state.answers,
-                timeSpent: state.timeSpent
-            });
-        } catch (err) {
-            console.error('Failed to save score:', err);
-        }
-    }
-
-    function handlePlayAgain() {
-        dispatch({ type: 'RESET_QUIZ' });
-        navigate('/quiz');
-    }
-
-    function handleGoHome() {
-        dispatch({ type: 'RESET_QUIZ' });
-        navigate('/');
-    }
-
-    // Calculate score if not already done
-    const correctAnswers = state.answers.filter(a => a.isCorrect).length;
-    const scorePercentage = Math.round((correctAnswers / state.questions.length) * 100);
-
+  if (!quizState.result) {
     return (
-        <div className="result-page">
-            <QuizResult
-                score={correctAnswers}
-                total={state.questions.length}
-                percentage={scorePercentage}
-            />
-
-            <div className="result-actions">
-                <button onClick={handlePlayAgain} className="btn btn-primary">
-                    Play Again
-                </button>
-                <button onClick={handleGoHome} className="btn btn-secondary">
-                    Back to Home
-                </button>
-            </div>
-
-            <div className="result-links">
-                <Link to="/attempts">View My Attempts</Link>
-                <Link to="/leaderboard">View Leaderboard</Link>
-            </div>
-        </div>
+      <section className="card">
+        <h2>No result available</h2>
+        <p>Please complete a quiz first.</p>
+        <Link to="/quiz">Go to Quiz</Link>
+      </section>
     );
+  }
+
+  function handleReset() {
+    quizDispatch({ type: 'RESET_QUIZ' });
+  }
+
+  return (
+    <section>
+      <QuizResult result={quizState.result} />
+      <div className="result-actions">
+        <Link to="/attempts">View My Attempts</Link>
+        <Link to="/leaderboard">View Leaderboard</Link>
+        <Link to="/quiz" onClick={handleReset}>Try Another Quiz</Link>
+      </div>
+    </section>
+  );
 }

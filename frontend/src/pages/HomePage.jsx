@@ -1,66 +1,46 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 
 export default function HomePage() {
-    const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
 
-    const categories = [
-        { name: 'Geography', icon: '🌍', description: 'Explore countries, capitals, and landscapes' },
-        { name: 'Science', icon: '🔬', description: 'Test your knowledge of physics, chemistry, and biology' },
-        { name: 'History', icon: '📜', description: 'Journey through historical events and figures' },
-        { name: 'Sports', icon: '⚽', description: 'Challenge your sports trivia knowledge' },
-        { name: 'Entertainment', icon: '🎬', description: 'Movies, music, and pop culture' },
-        { name: 'Technology', icon: '💻', description: 'Computing, internet, and tech innovations' }
-    ];
+  return (
+    <div className="home-page">
+      <section className="hero-section card">
+        <h1>Online Timed Quiz Game</h1>
+        <p>
+          Attempt active quizzes with a timer for each question, track your
+          attempts, and compare scores on the leaderboard.
+        </p>
 
-    return (
-        <div className="home-page">
-            <header className="hero">
-                <h1>Welcome to Quiz Game</h1>
-                <p>Challenge yourself with trivia questions across multiple categories</p>
-                {isAuthenticated ? (
-                    <Link to="/quiz" className="btn btn-primary btn-lg">Start Quiz</Link>
-                ) : (
-                    <div className="auth-buttons">
-                        <Link to="/login" className="btn btn-primary btn-lg">Login</Link>
-                        <Link to="/register" className="btn btn-secondary btn-lg">Register</Link>
-                    </div>
-                )}
-            </header>
+        {isAuthenticated ? (
+          isAdmin ? (
+            <Link to="/admin/dashboard" className="btn btn-primary">Open Admin Dashboard</Link>
+          ) : (
+            <Link to="/quiz" className="btn btn-primary">Choose a Quiz</Link>
+          )
+        ) : (
+          <div className="hero-actions">
+            <Link to="/register" className="btn btn-primary">Get Started</Link>
+            <Link to="/login" className="btn btn-secondary">Login</Link>
+          </div>
+        )}
+      </section>
 
-            <section className="categories-section">
-                <h2>Choose a Category</h2>
-                <div className="categories-grid">
-                    {categories.map(cat => (
-                        <div key={cat.name} className="category-card">
-                            <span className="category-icon">{cat.icon}</span>
-                            <h3>{cat.name}</h3>
-                            <p>{cat.description}</p>
-                            {isAuthenticated && (
-                                <Link to={`/quiz?category=${cat.name}`} className="btn btn-sm">Play</Link>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            <section className="features-section">
-                <h2>Features</h2>
-                <div className="features-grid">
-                    <div className="feature-item">
-                        <h3>Track Progress</h3>
-                        <p>View your quiz history and improvement over time</p>
-                    </div>
-                    <div className="feature-item">
-                        <h3>Leaderboards</h3>
-                        <p>Compete with other players globally</p>
-                    </div>
-                    <div className="feature-item">
-                        <h3>Multiple Categories</h3>
-                        <p>Six exciting categories to explore</p>
-                    </div>
-                </div>
-            </section>
+      <section className="features-grid">
+        <div className="feature-card">
+          <h3>Timed Questions</h3>
+          <p>Each question has its own countdown timer.</p>
         </div>
-    );
+        <div className="feature-card">
+          <h3>Quiz Selection</h3>
+          <p>Choose from active quizzes created by admin users.</p>
+        </div>
+        <div className="feature-card">
+          <h3>Leaderboard</h3>
+          <p>Scores include correct answers plus a small time bonus.</p>
+        </div>
+      </section>
+    </div>
+  );
 }

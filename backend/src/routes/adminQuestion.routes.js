@@ -1,44 +1,24 @@
 import express from 'express';
-import { 
-    getAllQuestions, 
-    getQuestionById, 
-    createQuestion, 
-    updateQuestion, 
-    deleteQuestion, 
-    toggleQuestionStatus,
-    bulkImportQuestions,
-    getQuestionStats
+import {
+  createQuestion,
+  deleteQuestion,
+  importQuestions,
+  listQuestions,
+  toggleQuestion,
+  updateQuestion
 } from '../controllers/adminQuestion.controller.js';
-import { validateQuestion, validateBulkImport } from '../validations/question.validation.js';
-import { rateLimit } from '../middleware/rateLimit.middleware.js';
+import { authMiddleware, adminMiddleware } from '../middleware/auth.middleware.js';
+import { validateBulkQuestions, validateQuestion } from '../validations/question.validation.js';
 
 const router = express.Router();
 
-// Apply rate limiting to all admin routes
-router.use(rateLimit);
+router.use(authMiddleware, adminMiddleware);
 
-// Get all questions
-router.get('/', getAllQuestions);
-
-// Get question statistics
-router.get('/stats', getQuestionStats);
-
-// Get single question
-router.get('/:id', getQuestionById);
-
-// Create question
+router.get('/', listQuestions);
 router.post('/', validateQuestion, createQuestion);
-
-// Update question
+router.post('/import', validateBulkQuestions, importQuestions);
 router.put('/:id', validateQuestion, updateQuestion);
-
-// Delete question
+router.patch('/:id/toggle', toggleQuestion);
 router.delete('/:id', deleteQuestion);
-
-// Toggle question status
-router.patch('/:id/toggle', toggleQuestionStatus);
-
-// Bulk import questions
-router.post('/bulk', validateBulkImport, bulkImportQuestions);
 
 export default router;

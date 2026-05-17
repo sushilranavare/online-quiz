@@ -1,48 +1,87 @@
 import mongoose from 'mongoose';
 
-const scoreSchema = new mongoose.Schema({
+const answerSchema = new mongoose.Schema(
+  {
+    questionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Question',
+      required: true
+    },
+    selectedAnswer: {
+      type: String,
+      required: true
+    },
+    isCorrect: {
+      type: Boolean,
+      required: true
+    },
+    remainingTimeSeconds: {
+      type: Number,
+      default: 0
+    }
+  },
+  { _id: false }
+);
+
+const scoreSchema = new mongoose.Schema(
+  {
     user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: [true, 'User is required']
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
     },
     username: {
-        type: String,
-        required: true
+      type: String,
+      required: true
     },
-    score: {
-        type: Number,
-        required: [true, 'Score is required'],
-        min: 0
+    quizId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Quiz'
+    },
+    quizName: {
+      type: String,
+      default: 'Timed Quiz'
+    },
+    correctAnswers: {
+      type: Number,
+      required: true,
+      min: 0
     },
     totalQuestions: {
-        type: Number,
-        required: true
+      type: Number,
+      required: true,
+      min: 6,
+      max: 10
     },
-    category: {
-        type: String,
-        required: [true, 'Category is required']
+    timeBonus: {
+      type: Number,
+      default: 0
+    },
+    score: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    questionTimeSeconds: {
+      type: Number,
+      default: 30
+    },
+    totalRemainingTimeSeconds: {
+      type: Number,
+      default: 0
     },
     answers: {
-        type: [{
-            questionId: mongoose.Schema.Types.ObjectId,
-            selectedOption: Number,
-            isCorrect: Boolean
-        }],
-        default: []
-    },
-    timeSpent: {
-        type: Number,
-        default: 0
-    },
-    completedAt: {
-        type: Date,
-        default: Date.now
+      type: [answerSchema],
+      required: true
     }
-});
+  },
+  { timestamps: true }
+);
 
-scoreSchema.index({ user: 1, completedAt: -1 });
-scoreSchema.index({ score: -1 });
-scoreSchema.index({ category: 1, score: -1 });
+scoreSchema.index({ user: 1, createdAt: -1 });
+scoreSchema.index({ score: -1, createdAt: -1 });
+scoreSchema.index({ quizId: 1, score: -1 });
 
-export default mongoose.model('Score', scoreSchema);
+const Score = mongoose.model('Score', scoreSchema);
+export { Score };
+export default Score;

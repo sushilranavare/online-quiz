@@ -1,66 +1,63 @@
-import { createContext, useReducer, useContext } from 'react';
+import { createContext, useContext, useReducer } from 'react';
 
 export const QuizContext = createContext(null);
 
-// Hook to use quiz context
-export function useQuiz() {
-    const context = useContext(QuizContext);
-    if (!context) {
-        throw new Error('useQuiz must be used within QuizProvider');
-    }
-    return context;
-}
-
-const initialState = {
-    questions: [],
-    currentQuestionIndex: 0,
-    answers: [],
-    score: 0,
-    timeSpent: 0,
-    category: null,
-    status: 'idle' // idle, loading, in_progress, completed
+export const quizInitialState = {
+  questions: [],
+  currentIndex: 0,
+  answers: [],
+  result: null,
+  isStarted: false,
+  questionTimeSeconds: 30
 };
 
-function quizReducer(state, action) {
-    switch (action.type) {
-        case 'SET_QUESTIONS':
-            return {
-                ...state,
-                questions: action.payload,
-                status: 'in_progress',
-                currentQuestionIndex: 0,
-                answers: [],
-                score: 0
-            };
-        case 'SET_CATEGORY':
-            return { ...state, category: action.payload };
-        case 'ANSWER_QUESTION':
-            return {
-                ...state,
-                answers: [...state.answers, action.payload],
-                currentQuestionIndex: state.currentQuestionIndex + 1
-            };
-        case 'UPDATE_SCORE':
-            return { ...state, score: action.payload };
-        case 'UPDATE_TIME':
-            return { ...state, timeSpent: action.payload };
-        case 'COMPLETE_QUIZ':
-            return { ...state, status: 'completed' };
-        case 'RESET_QUIZ':
-            return { ...initialState };
-        default:
-            return state;
+export function quizReducer(state, action) {
+  switch (action.type) {
+    case 'START_QUIZ':
+      return {
+        questions: action.payload.questions,
+        currentIndex: 0,
+        answers: [],
+        result: null,
+        isStarted: true,
+        questionTimeSeconds: action.payload.questionTimeSeconds || 30
+      };
+    case 'SAVE_ANSWER': {
+      const existingAnswerIndex = state.answers.findIndex(
+        (answer) => answer.questionId === action.payload.questionId
+      );
+      const updatedAnswers = [...state.answers];
+
+      if (existingAnswerIndex >= 0) updatedAnswers[existingAnswerIndex] = action.payload;
+      else updatedAnswers.push(action.payload);
+
+      return { ...state, answers: updatedAnswers };
     }
+    case 'NEXT_QUESTION':
+      return { ...state, currentIndex: state.currentIndex + 1 };
+    case 'SET_RESULT':
+      return { ...state, result: action.payload };
+    case 'RESET_QUIZ':
+      return quizInitialState;
+    default:
+      return state;
+  }
 }
 
 export function QuizProvider({ children }) {
-    const [state, dispatch] = useReducer(quizReducer, initialState);
+  const [state, dispatch] = useReducer(quizReducer, quizInitialState);
 
-    return (
-        <QuizContext.Provider value={{ state, dispatch }}>
-            {children}
-        </QuizContext.Provider>
-    );
+  return (
+    <QuizContext.Provider value={{ state, dispatch, quizState: state, quizDispatch: dispatch }}>
+      {children}
+    </QuizContext.Provider>
+  );
+}
+
+export function useQuiz() {
+  const context = useContext(QuizContext);
+  if (!context) throw new Error('useQuiz must be used within QuizProvider');
+  return context;
 }
 
 export default QuizProvider;

@@ -7,6 +7,7 @@ import quizRoutes from './routes/quiz.routes.js';
 import scoreRoutes from './routes/score.routes.js';
 import leaderboardRoutes from './routes/leaderboard.routes.js';
 import adminQuestionRoutes from './routes/adminQuestion.routes.js';
+import adminQuizRoutes from './routes/adminQuiz.routes.js';
 
 import { errorHandler, notFound } from './middleware/error.middleware.js';
 import { env } from './config/env.js';
@@ -36,6 +37,7 @@ app.use('/api/quiz', quizRoutes);
 app.use('/api/scores', scoreRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/admin/questions', adminQuestionRoutes);
+app.use('/api/admin/quizzes', adminQuizRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

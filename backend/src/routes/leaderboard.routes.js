@@ -1,9 +1,8 @@
-import { Router } from 'express';
+import express from 'express';
 import { getLeaderboard } from '../controllers/leaderboard.controller.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
 
-const router = Router();
+const router = express.Router();
 
-router.get('/', asyncHandler(getLeaderboard));
+router.get('/', getLeaderboard);
 
 export default router;

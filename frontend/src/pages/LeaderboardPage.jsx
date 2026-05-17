@@ -8,11 +8,10 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const loadLeaderboard = async () => {
+    async function loadLeaderboard() {
       try {
         setLoading(true);
         setError('');
-
         const response = await leaderboardApi.getLeaderboard();
         setLeaderboard(response.data.data.leaderboard || []);
       } catch (err) {
@@ -20,23 +19,16 @@ export default function LeaderboardPage() {
       } finally {
         setLoading(false);
       }
-    };
-
+    }
     loadLeaderboard();
   }, []);
 
   return (
     <section className="card">
       <h2>Leaderboard</h2>
-
-      <p>
-        Ranking is based on the final timed quiz score. The score includes
-        correct answers plus a small time bonus.
-      </p>
-
+      <p>Ranking is based on final timed quiz score, including correct answers and time bonus.</p>
       {loading && <p>Loading leaderboard...</p>}
-      {error && <p className="error">{error}</p>}
-
+      {error && <p className="error-message">{error}</p>}
       <LeaderboardTable leaderboard={leaderboard} />
     </section>
   );

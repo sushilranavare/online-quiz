@@ -1,88 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getQuestionStats } from '../../api/adminApi';
+import api from '../../api/axios';
 
 export default function AdminDashboardPage() {
-    const [stats, setStats] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [quizzes, setQuizzes] = useState([]);
+  const [error, setError] = useState('');
 
-    useEffect(() => {
-        loadStats();
-    }, []);
-
-    async function loadStats() {
-        try {
-            setLoading(true);
-            const response = await getQuestionStats();
-            if (response.success) {
-                setStats(response.data);
-            }
-        } catch (err) {
-            setError(err.message || 'Failed to load statistics');
-        } finally {
-            setLoading(false);
-        }
+  useEffect(() => {
+    async function loadDashboard() {
+      try {
+        const response = await api.get('/admin/quizzes/dashboard');
+        setStats(response.data.data.stats);
+        setQuizzes(response.data.data.quizzes || []);
+      } catch (err) {
+        setError(err.response?.data?.error || 'Failed to load admin dashboard');
+      }
     }
+    loadDashboard();
+  }, []);
 
-    if (loading) {
-        return <div className="loading">Loading dashboard...</div>;
-    }
+  return (
+    <section className="card admin-page">
+      <div className="admin-header">
+        <div><h2>Admin Dashboard</h2><p>Manage quizzes, questions, and users.</p></div>
+        <Link className="button-link" to="/admin/quizzes">Manage Quizzes</Link>
+      </div>
 
-    if (error) {
-        return <div className="error-message">{error}</div>;
-    }
-
-    return (
-        <div className="admin-dashboard">
-            <h1>Admin Dashboard</h1>
-
-            <div className="dashboard-stats">
-                <div className="stat-card">
-                    <h3>Total Questions</h3>
-                    <p className="stat-value">{stats?.total || 0}</p>
-                </div>
-                <div className="stat-card">
-                    <h3>Active Questions</h3>
-                    <p className="stat-value">{stats?.active || 0}</p>
-                </div>
-                <div className="stat-card">
-                    <h3>Inactive Questions</h3>
-                    <p className="stat-value">{stats?.inactive || 0}</p>
-                </div>
-            </div>
-
-            <div className="dashboard-sections">
-                <div className="dashboard-section">
-                    <h2>Questions by Category</h2>
-                    <div className="category-stats">
-                        {stats?.byCategory?.map(cat => (
-                            <div key={cat._id} className="category-item">
-                                <span className="category-name">{cat._id}</span>
-                                <span className="category-count">{cat.count}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="dashboard-section">
-                    <h2>Questions by Difficulty</h2>
-                    <div className="difficulty-stats">
-                        {stats?.byDifficulty?.map(diff => (
-                            <div key={diff._id} className={`difficulty-item ${diff._id}`}>
-                                <span className="difficulty-name">{diff._id}</span>
-                                <span className="difficulty-count">{diff.count}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div className="dashboard-actions">
-                <Link to="/admin/questions" className="btn btn-primary">
-                    Manage Questions
-                </Link>
-            </div>
+      {error && <p className="error-message">{error}</p>}
+      {stats && (
+        <div className="dashboard-grid">
+          <div className="stat-card"><strong>Total Quizzes</strong><p>{stats.totalQuizzes}</p></div>
+          <div className="stat-card"><strong>Active Quizzes</strong><p>{stats.activeQuizzes}</p></div>
+          <div className="stat-card"><strong>Inactive Quizzes</strong><p>{stats.inactiveQuizzes}</p></div>
+          <div className="stat-card"><strong>Total Users</strong><p>{stats.totalUsers}</p></div>
         </div>
-    );
+      )}
+
+      <h3>Quiz Overview</h3>
+      <div className="quiz-card-grid">
+        {quizzes.map((quiz) => (
+          <article key={quiz._id} className="quiz-admin-card">
+            <div className="quiz-card-title-row"><h4>{quiz.name}</h4><span className={quiz.isActive ? 'badge active' : 'badge inactive'}>{quiz.isActive ? 'Active' : 'Inactive'}</span></div>
+            <p>{quiz.description || 'No description added.'}</p>
+            <div className="quiz-card-stats"><span>Total questions: {quiz.totalQuestions}</span><span>Active questions: {quiz.activeQuestions}</span><span>Inactive questions: {quiz.inactiveQuestions}</span></div>
+            <Link className="button-link" to="/admin/quizzes">Modify Quiz</Link>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }
